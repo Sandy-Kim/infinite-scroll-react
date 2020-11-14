@@ -1,4 +1,6 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { add } from './listReducer';
 import useInfiniteScroll from './useInfiniteScroll';
 import styled from 'styled-components';
 
@@ -29,13 +31,12 @@ const Sentinel = styled.div`
 `;
 
 export default function InfiniteScroll() {
-  const listNum = useRef(1);
-  const [list, setList] = useState([]);
+  const { number, list } = useSelector((state)=>state);
+  const dispatch = useDispatch();
 
   const onInsert = useCallback(()=>{
-    const nextList = list.concat(listNum.current++);
-    setList(nextList);
-  }, [list]);
+    dispatch(add(number + 1));
+  }, [dispatch, number]);
 
   const checkIntersect = useCallback(([entry], observer) => {
     if (entry.isIntersecting) {
