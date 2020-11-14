@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
+import useInfiniteScroll from './useInfiniteScroll';
 import styled from 'styled-components';
 
 const ListArea = styled.div`
@@ -27,8 +28,7 @@ const Sentinel = styled.div`
   height: 1px;
 `;
 
-const ListBox = () => {
-  const ref = useRef();
+export default function InfiniteScroll() {
   const listNum = useRef(1);
   const [list, setList] = useState([]);
 
@@ -37,35 +37,23 @@ const ListBox = () => {
     setList(nextList);
   }, [list]);
 
-  const Lists = list.map((num, index) => {
-      return (
-        <List key={index}>
-          {num}
-        </List>
-      );
-    });
-
   const checkIntersect = useCallback(([entry], observer) => {
     if (entry.isIntersecting) {
       observer.unobserve(entry.target);
-      //redux dispatch
       onInsert();
       observer.observe(entry.target);
     }
   }, [onInsert]);
 
-  useEffect(() => {
-    let observer;
-    if (ref.current) {
-      observer = new IntersectionObserver(checkIntersect, {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.5,
-      });
-      observer.observe(ref.current);
-    }
-    return () => observer && observer.disconnect();
-  }, [checkIntersect]);
+  const { ref } = useInfiniteScroll(checkIntersect);
+
+  const Lists = list.map((num, index) => {
+    return (
+      <List key={index}>
+        {num}
+      </List>
+    );
+  });
 
   return (
     <ListArea className="scroll-control">
@@ -74,5 +62,3 @@ const ListBox = () => {
     </ListArea>
   );
 };
-
-export default ListBox;
